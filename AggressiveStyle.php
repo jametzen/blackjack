@@ -12,7 +12,7 @@ class AggressiveStyle implements IBlackjackPlayStyle
 {
     private $objHand;
 
-    public function __construct(IBlackjackHand $objEmptyHand)
+    public function __construct(IBlackjackHand $objEmptyHand = null)
     {
         $this->objHand = $objEmptyHand;
     }
@@ -20,5 +20,10 @@ class AggressiveStyle implements IBlackjackPlayStyle
     public function decide(IBicycleCard $objCard)
     {
 
+    }
+
+    public function setHand(IBlackjackHand $objHand)
+    {
+        $this->objHand = $objHand;
     }
 }

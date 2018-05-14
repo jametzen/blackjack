@@ -12,9 +12,9 @@ class TestHand implements IBlackjackHand
 {
     private $aCards;
 
-    public function __construct()
+    public function __construct(array $aStartingCards = array())
     {
-        $this->aCards = array();
+        $this->aCards = $aStartingCards;
     }
 
     public function addCard(IBicycleCard $objCard)
