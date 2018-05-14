@@ -12,4 +12,5 @@ require_once("IHand.php");
 interface IBlackjackHand extends IHand
 {
     public function addCard(IBicycleCard $objCard);
+    public function getTotal();
 }

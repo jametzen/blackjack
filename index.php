@@ -11,6 +11,7 @@ define("PLAYERS_PER_GAME", 5);
 
 require_once("TestHand.php");
 require_once("AggressiveStyle.php");
+require_once("DealerStyle.php");
 require_once("BlackjackDeck.php");
 
 require_once("cards/Two.php");
@@ -55,6 +56,8 @@ if(count($argv) == 2){
             4 => new AggressiveStyle(),
             5 => new AggressiveStyle());
 
+    $aResults = array();
+
     $aPlayerHands = array();
 
     // $aDeck = array_flip(range(1, 52));
@@ -89,7 +92,13 @@ if(count($argv) == 2){
         // Deal two cards, face up, to each player. One face up and one face down to the dealer.
         $intCardNum = 0;
         for($intPlayerNum=1; $intPlayerNum<=PLAYERS_PER_GAME; $intPlayerNum++){
-            echo "Processing player $intPlayerNum========================\n";
+            // echo "Processing player $intPlayerNum========================\n";
+
+            // @todo Make this an attribute of a Game object.
+            $aResults[$intPlayerNum][$intGameNumber] = array(
+                "total" => "",
+                "state" => "",
+                "result" => "");
 
             $aNewCards = $objDeck->deal(2);
             $objHand = new TestHand($aNewCards);
@@ -104,34 +113,84 @@ if(count($argv) == 2){
             $strResult = "";
             while($strDecision != "stay" && $strResult != "bust" && $strResult != "blackjack"){
                 $objNext = $objDeck->dealOne();
-                echo "Next:\n" . print_r($objNext, true) . "\n";
-                echo "Total before adding card: $intTotal\n";
+                // echo "Next:\n" . print_r($objNext, true) . "\n";
+                // echo "Total before adding card: $intTotal\n";
 
                 $objHand->addCard($objNext);
 
                 // @todo Store results in an overall structure.
                 $intTotal = $objHand->getTotal();
-                echo "Total after adding card: $intTotal\n";
+                // echo "Total after adding card: $intTotal\n";
                 if($intTotal > 21){
-                    echo "[BUST]\n";
+                    // echo "[BUST]\n";
                     $strResult = "bust";
                 }
                 elseif($intTotal == 21){
-                    echo "[BLACKJACK]\n";
+                    // echo "[BLACKJACK]\n";
                     $strResult = "blackjack";
                 }
                 else{
                     $strDecision = $objStyle->decide();
                 }
 
-                echo "Player decided: $strDecision\n";
+                // echo "Player decided: $strDecision\n";
             }
 
-            echo "End processing player $intPlayerNum========================\n";
+            $aResults[$intPlayerNum][$intGameNumber]["total"] = $intTotal;
+            $aResults[$intPlayerNum][$intGameNumber]["state"] = $strResult;
+
+            // echo "End processing player $intPlayerNum========================\n";
         }
 
+        // echo "Processing dealer========================\n";
+
         // Process play for dealer.
+        $aResults["dealer"][$intGameNumber] = array(
+            "total" => "",
+            "state" => "",
+            "result" => "");
+        // @todo Create some mechanism for representing cards as face up/face down. In standard rules, no one would be able to see the dealer's second card.
+        $aDealerCards = $objDeck->deal(2);
+        $objDealerHand = new TestHand($aDealerCards);
+        $objDealerStyle = new DealerStyle($objDealerHand);
+
+        $intTotal = $objDealerHand->getTotal();
+        $strDecision = $objDealerStyle->decide();
+        $strResult = "";
+        while($strDecision != "stay" && $strResult != "bust" && $strResult != "blackjack"){
+            $objNext = $objDeck->dealOne();
+                // echo "Next:\n" . print_r($objNext, true) . "\n";
+                // echo "Total before adding card: $intTotal\n";
+
+                $objHand->addCard($objNext);
+
+                // @todo Store results in an overall structure.
+                $intTotal = $objHand->getTotal();
+                // echo "Total after adding card: $intTotal\n";
+                if($intTotal > 21){
+                    // echo "[BUST]\n";
+                    $strResult = "bust";
+                }
+                elseif($intTotal == 21){
+                    // echo "[BLACKJACK]\n";
+                    $strResult = "blackjack";
+                }
+                else{
+                    $strDecision = $objStyle->decide();
+                }
+
+                // echo "Player decided: $strDecision\n";
+            }
+
+            // echo "Last dealer decision: $strDecision, total : $intTotal\n";
+
+            $aResults["dealer"][$intGameNumber]["total"] = $intTotal;
+            $aResults["dealer"][$intGameNumber]["state"] = $strResult;
+
+            // echo "End processing dealer========================\n";
 
         // Evaluate results.
-    }
+
+        echo "Results:\n" . print_r($aResults, true) . "\n";
+    } // Games loop.
 }
