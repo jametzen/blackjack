@@ -15,7 +15,7 @@ interface IBlackjackPlayStyle extends IPlayStyle
     // of cards we're already received.
     // @todo Inject dependencies in the constructor?
     // public function decide(IBlackjackHand $objHand);
-    public function decide(IBicycleCard $objCard);
+    public function decide();
 
-    public function setHand(IBlackjackHand $objHand);
+    public function setHand(IBlackjackHand &$objHand);
 }

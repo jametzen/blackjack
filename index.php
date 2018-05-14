@@ -11,6 +11,7 @@ define("PLAYERS_PER_GAME", 5);
 
 require_once("TestHand.php");
 require_once("AggressiveStyle.php");
+require_once("BlackjackDeck.php");
 
 require_once("cards/Two.php");
 require_once("cards/Three.php");
@@ -58,6 +59,7 @@ if(count($argv) == 2){
 
     // $aDeck = array_flip(range(1, 52));
     $aDeck = array();
+    $objDeck = new BlackjackDeck();
     $aSuites = array("Clubs", "Diamonds", "Hearts", "Spades");
     $aCardSequence = array("Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King", "Ace");
 
@@ -65,14 +67,18 @@ if(count($argv) == 2){
     foreach($aCardSequence as $strCard){
         foreach($aSuites as $strSuite){
             $aDeck[] = new $strCard($strSuite);
+            $objDeck->addCard(new $strCard($strSuite));
         }
     }
 
-    echo "Deck:\n" . print_r($aDeck, true) . "\n";
+    shuffle($aDeck);
+    $objDeck->shuffle();
+
+    // echo "Deck:\n" . print_r($aDeck, true) . "\n";
 
     echo "Number of hands to process: $intNumGames\n";
 
-    for($intGameNumber=1; $intGameNumber<=$intNumGames; $intGameNumber++){
+    for($intGameNumber=1; $intGameNumber<=1; $intGameNumber++){
         // $objGame = new Blackjack();
         // $objGame->setPlayerCount(PLAYERS_PER_GAME);
 
@@ -81,10 +87,51 @@ if(count($argv) == 2){
         $objTestStyle = new AggressiveStyle($objTestHand);
 
         // Deal two cards, face up, to each player. One face up and one face down to the dealer.
+        $intCardNum = 0;
         for($intPlayerNum=1; $intPlayerNum<=PLAYERS_PER_GAME; $intPlayerNum++){
-            $aPlayerHands[$intPlayerNum] = new TestHand(array(new Ace("Spades")));
+            echo "Processing player $intPlayerNum========================\n";
+
+            $aNewCards = $objDeck->deal(2);
+            $objHand = new TestHand($aNewCards);
+            $aPlayerHands[$intPlayerNum] = $objHand;
+            $objStyle = $aPlayersToStyles[$intPlayerNum];
+
+            $objStyle->setHand($objHand);
 
             // For each player in the game, play until a stay, 21, or bust.
+            $intTotal = $objHand->getTotal();
+            $strDecision = $objStyle->decide();
+            $strResult = "";
+            while($strDecision != "stay" && $strResult != "bust" && $strResult != "blackjack"){
+                $objNext = $objDeck->dealOne();
+                echo "Next:\n" . print_r($objNext, true) . "\n";
+                echo "Total before adding card: $intTotal\n";
+
+                $objHand->addCard($objNext);
+
+                // @todo Store results in an overall structure.
+                $intTotal = $objHand->getTotal();
+                echo "Total after adding card: $intTotal\n";
+                if($intTotal > 21){
+                    echo "[BUST]\n";
+                    $strResult = "bust";
+                }
+                elseif($intTotal == 21){
+                    echo "[BLACKJACK]\n";
+                    $strResult = "blackjack";
+                }
+                else{
+                    $strDecision = $objStyle->decide();
+                }
+
+                echo "Player decided: $strDecision\n";
+            }
+
+            echo "End processing player $intPlayerNum========================\n";
         }
+
+        // Process play for dealer.
+
+        // Evaluate results.
     }
 }

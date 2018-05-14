@@ -17,12 +17,14 @@ class AggressiveStyle implements IBlackjackPlayStyle
         $this->objHand = $objEmptyHand;
     }
 
-    public function decide(IBicycleCard $objCard)
+    public function decide()
     {
+        echo "Number of cards in this hand: " . count($this->objHand) . "\n";
 
+        return "hit";
     }
 
-    public function setHand(IBlackjackHand $objHand)
+    public function setHand(IBlackjackHand &$objHand)
     {
         $this->objHand = $objHand;
     }

@@ -21,4 +21,15 @@ class TestHand implements IBlackjackHand
     {
         $this->aCards[] = $objCard;
     }
+
+    public function getTotal()
+    {
+        $intTotal = 0;
+
+        foreach($this->aCards as $objCard){
+            $intTotal += $objCard->getValue();
+        }
+
+        return $intTotal;
+    }
 }
