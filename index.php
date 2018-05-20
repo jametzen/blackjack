@@ -14,7 +14,7 @@ if(count($argv) == 2){
     $objGame = new BlackjackGame();
 
     // This will probably need to be an interface.
-    $objResults = new BlackjackResultsLogger();
+    $objResults = new BlackjackResultsLogger("blackjack-run-" . time() . ".txt");
 
     // @todo Determine where the boundary between games/hands/players is. Do you instantiate a new Game with every hand?
     // Do you just call something like game->start() or game->deal()?
@@ -63,7 +63,7 @@ if(count($argv) == 2){
         // given style busts, etc.
 
         // Going to log this stuff as simple key/value pairs.
-        $objResults->addSet(array(
+        $objResults->queueSet(array(
             "winner" => $objWinner->getPlayerNumber(),
             "score" => $intTotal
         ));
