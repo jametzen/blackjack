@@ -11,10 +11,13 @@ define("NUM_PLAYERS", 5);
 if(count($argv) == 2){
     $intNumGames = $argv[1];
 
-    $objGame = new BlackjackGame();
+    $objDealer = new BlackjackDealer(new DealerStyle());
+    $objGame = new BlackjackGame($objDealer);
 
     // This will probably need to be an interface.
     $objResults = new BlackjackResultsLogger("blackjack-run-" . time() . ".txt");
+
+    $objDeck = new BlackjackDeck(6); // Number of 52-card decks.
 
     // @todo Determine where the boundary between games/hands/players is. Do you instantiate a new Game with every hand?
     // Do you just call something like game->start() or game->deal()?
@@ -43,17 +46,18 @@ if(count($argv) == 2){
         $objGame->addPlayer($objPlayer);
     }
 
-    $objDealer = new BlackjackDealer(new DealerStyle());
-
     // @todo Figure out how to generate a random play style here without resorting to dynamic variables and the like.
     for($i=1;$i<=$intNumGames;$i++){
         // @note Dependency is a bit weird here. Normally I'd be inclined to tell the game to deal a new hand.
-        $objHand = new BlackjackHand($objGame);
+        $objHand = new BlackjackHand($objGame, $objDeck);
         // Alternatively.
-        $objGame->dealHand($objHand);
+        // $objGame->dealHand($objHand);
+        $objGame->dealHand($objDeck);
 
+        // @todo If you're using the dealer to associate with players, you'll have to tell the dealer which game
+        // it's playing and which players its playing against somehow.
         while(!$objGame->isFinished()){
-            $objGame->getPlayerInput();
+            $objGame->getPlayerInput($objDealer, $objGame->getCurrentPlayer());
         }
 
         $objWinner = $objGame->getWinner(); // Should return a player.
